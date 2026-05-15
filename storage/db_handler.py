@@ -10,11 +10,15 @@ from datetime import datetime
 # Database file ka path
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'sessions.db')
 
-
 # ── Database Initialize ──────────────────────────────────────────────────────
 # Pehli baar run hone par table banata hai
 # Agar table already exist kare toh kuch nahi karta
 def init_db():
+    # Streamlit Cloud ke liye fix: Agar 'data' folder nahi hai toh khud bana lo
+    db_dir = os.path.dirname(DB_PATH)
+    if not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute('''
@@ -32,7 +36,6 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
-
 
 # ── Save Session ─────────────────────────────────────────────────────────────
 # Pipeline complete hone ke baad result save karta hai
@@ -61,7 +64,6 @@ def save_session(session_name: str, pipeline_result: dict) -> int:
     conn.close()
     return session_id
 
-
 # ── Get All Sessions ─────────────────────────────────────────────────────────
 # Sidebar mein past sessions dikhane ke liye
 def get_all_sessions() -> list:
@@ -79,7 +81,6 @@ def get_all_sessions() -> list:
         {"id": r[0], "session_name": r[1], "subject": r[2], "created_at": r[3]}
         for r in rows
     ]
-
 
 # ── Get Single Session ───────────────────────────────────────────────────────
 # Kisi specific session ka poora data load karta hai
@@ -105,7 +106,6 @@ def get_session_by_id(session_id: int) -> dict:
         "rubric": json.loads(row[7]),
         "analytics": json.loads(row[8])
     }
-
 
 # ── Delete Session ───────────────────────────────────────────────────────────
 # Kisi session ko delete karta hai
